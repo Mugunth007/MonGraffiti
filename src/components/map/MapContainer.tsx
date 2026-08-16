@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Graffiti, LocationCoordinates } from '@/lib/types';
 import { CustomGraffitiMarker } from './CustomGraffitiMarker';
-import { Search, MapPin, Plus, Sparkles, Navigation, Layers, Compass } from 'lucide-react';
+import { Search, MapPin, Plus, Navigation, Compass } from 'lucide-react';
 
 interface MapContainerProps {
   graffitis: Graffiti[];
@@ -14,14 +14,14 @@ interface MapContainerProps {
 
 // Popular locations featuring Indian tech & culture hubs
 const POPULAR_CITIES = [
-  { name: 'Bengaluru 🇮🇳', lat: 12.9716, lng: 77.5946 },
-  { name: 'New Delhi 🇮🇳', lat: 28.6139, lng: 77.2090 },
-  { name: 'Mumbai 🇮🇳', lat: 19.0760, lng: 72.8777 },
-  { name: 'Chennai 🇮🇳', lat: 13.0827, lng: 80.2707 },
-  { name: 'Hyderabad 🇮🇳', lat: 17.3850, lng: 78.4867 },
-  { name: 'Kolkata 🇮🇳', lat: 22.5726, lng: 88.3639 },
-  { name: 'Tokyo 🇯🇵', lat: 35.6762, lng: 139.6503 },
-  { name: 'San Francisco 🇺🇸', lat: 37.7749, lng: -122.4194 },
+  { name: 'Bengaluru', lat: 12.9716, lng: 77.5946 },
+  { name: 'New Delhi', lat: 28.6139, lng: 77.2090 },
+  { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
+  { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
+  { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
+  { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
+  { name: 'San Francisco', lat: 37.7749, lng: -122.4194 },
 ];
 
 export const MapContainer: React.FC<MapContainerProps> = ({
@@ -62,11 +62,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       return;
     }
 
-    // Default to Leaflet dark map tiles
+    // Default to Leaflet light map tiles
     initLeafletMap();
   }, [apiKey]);
 
-  // Leaflet Map Initialization with Dark Tile Layer
+  // Leaflet Map Initialization with Light Tile Layer
   const initLeafletMap = async () => {
     if (!mapRef.current || leafletMapInstance.current) return;
 
@@ -79,8 +79,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         zoomControl: false,
       });
 
-      // Add CartoDB Dark Matter tile layer for stunning dark aesthetics
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      // CartoDB Positron (light) tiles for the brutalist-editorial canvas feel
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         subdomains: 'abcd',
         maxZoom: 19,
@@ -98,7 +98,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   };
 
-  // Google Maps Initialization
+  // Google Maps Initialization — light neutral palette
   const initGoogleMap = () => {
     if (!mapRef.current || !(window as any).google?.maps) return;
     setUseGoogleMaps(true);
@@ -109,11 +109,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       disableDefaultUI: true,
       zoomControl: true,
       styles: [
-        { elementType: 'geometry', stylers: [{ color: '#0e0e14' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#0e0e14' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#836ef9' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a3c' }] },
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#05050a' }] },
+        { elementType: 'geometry', stylers: [{ color: '#e5e5e5' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#444444' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c6c6c6' }] },
+        { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#f3f3f3' }] },
       ],
     });
 
@@ -134,12 +135,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     graffitis.forEach((g) => {
       const customIcon = L.divIcon({
         className: 'custom-leaflet-marker',
-        html: `<div class="relative p-1 rounded-2xl bg-gradient-to-tr from-[#836EF9] to-[#FF5E97] shadow-xl hover:scale-125 transition-transform cursor-pointer">
-                 <img src="${g.image_url}" class="w-10 h-10 rounded-xl object-cover border border-[#0E0E14]" />
-                 <span class="absolute -top-1 -right-1 text-xs">🎨</span>
+        html: `<div style="padding:3px;border-radius:16px;background:#ffffff;cursor:pointer;transition:transform 0.15s;">
+                 <img src="${g.image_url}" style="width:40px;height:40px;border-radius:12px;object-fit:cover;display:block;" />
                </div>`,
-        iconSize: [44, 44],
-        iconAnchor: [22, 22],
+        iconSize: [46, 46],
+        iconAnchor: [23, 23],
       });
 
       const marker = L.marker([g.latitude, g.longitude], { icon: customIcon }).addTo(map);
@@ -189,33 +189,33 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-[#05050A] overflow-hidden select-none">
-      {/* Search Navbar - Properly Aligned Below Top Header */}
-      <div className="absolute top-20 left-4 right-4 md:left-6 md:w-[450px] z-30 flex flex-col gap-2.5">
-        <form onSubmit={handleSearchSubmit} className="relative shadow-2xl">
+    <div className="relative w-full h-full min-h-screen bg-warm-canvas overflow-hidden select-none">
+      {/* Search Navbar */}
+      <div className="absolute top-4 left-4 right-4 md:left-6 md:w-[450px] z-30 flex flex-col gap-2.5">
+        <form onSubmit={handleSearchSubmit} className="relative">
           <input
             type="text"
-            placeholder="Search location in India (e.g., Bengaluru, Delhi, Mumbai)..."
+            placeholder="Search location (e.g., Bengaluru, Delhi, Mumbai)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-12 py-3 rounded-2xl glass-panel text-xs text-white placeholder-gray-400 border border-mon-border focus:outline-none focus:border-[#836EF9] shadow-2xl backdrop-blur-xl"
+            className="w-full pl-10 pr-12 py-3 rounded-card bg-paper-white text-sm text-carbon-black placeholder-smoke font-sans focus:outline-none focus:ring-2 focus:ring-carbon-black/10 transition-all"
           />
-          <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-[#836EF9]" />
+          <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-smoke" />
           <button
             type="submit"
-            className="absolute right-2 top-2 p-1.5 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#FF5E97] text-white hover:brightness-110 transition-all shadow-md"
+            className="absolute right-2 top-2 p-1.5 rounded-btn bg-carbon-black text-paper-white transition-opacity hover:opacity-85"
           >
             <Navigation className="w-3.5 h-3.5" />
           </button>
         </form>
 
-        {/* Quick City Chips */}
+        {/* Quick City Chips — mint tag pills */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-1.5 scrollbar-none">
           {POPULAR_CITIES.map((city) => (
             <button
               key={city.name}
               onClick={() => panToLocation(city.lat, city.lng, 10)}
-              className="px-3 py-1.5 rounded-xl glass-panel text-[11px] font-semibold text-gray-200 hover:text-white hover:border-[#FF5E97] whitespace-nowrap transition-all border border-mon-border shadow-md"
+              className="tag-mint whitespace-nowrap transition-opacity hover:opacity-75"
             >
               {city.name}
             </button>
@@ -235,7 +235,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             top: '45%',
             transform: 'translate(-50%, -50%)',
           }}
-          className="z-40 animate-bounce pointer-events-auto"
+          className="z-40 pointer-events-auto"
         >
           <div className="relative flex flex-col items-center">
             <button
@@ -244,13 +244,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                 onCreateGraffitiAt(clickedLocation);
                 setClickedLocation(null);
               }}
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#836EF9] via-[#FF5E97] to-[#836EF9] text-white font-extrabold text-xs shadow-2xl flex items-center space-x-2 hover:scale-105 transition-all whitespace-nowrap glow-pink border border-white/20"
+              className="px-5 py-3 rounded-btn bg-carbon-black text-paper-white font-sans font-medium text-xs flex items-center space-x-2 transition-opacity hover:opacity-85 whitespace-nowrap uppercase tracking-tight"
             >
               <Plus className="w-4 h-4" />
               <span>Create Graffiti Here ({clickedLocation.lat.toFixed(2)}, {clickedLocation.lng.toFixed(2)})</span>
             </button>
-            <div className="w-3.5 h-3.5 bg-[#FF5E97] rotate-45 -mt-1.5 shadow-lg" />
-            <MapPin className="w-7 h-7 text-[#FF5E97] -mt-1" />
+            <div className="w-3 h-3 bg-carbon-black rotate-45 -mt-1.5" />
+            <MapPin className="w-6 h-6 text-carbon-black -mt-1" />
           </div>
         </div>
       )}
@@ -261,7 +261,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           onClick={() => {
             if (leafletMapInstance.current) leafletMapInstance.current.zoomIn();
           }}
-          className="w-10 h-10 rounded-2xl glass-panel text-white font-bold text-lg flex items-center justify-center hover:bg-[#836EF9]/20 transition-all border border-mon-border shadow-xl"
+          className="w-10 h-10 rounded-card bg-paper-white text-carbon-black font-bold text-lg flex items-center justify-center transition-opacity hover:opacity-75"
         >
           +
         </button>
@@ -269,13 +269,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           onClick={() => {
             if (leafletMapInstance.current) leafletMapInstance.current.zoomOut();
           }}
-          className="w-10 h-10 rounded-2xl glass-panel text-white font-bold text-lg flex items-center justify-center hover:bg-[#836EF9]/20 transition-all border border-mon-border shadow-xl"
+          className="w-10 h-10 rounded-card bg-paper-white text-carbon-black font-bold text-lg flex items-center justify-center transition-opacity hover:opacity-75"
         >
           -
         </button>
         <button
           onClick={() => panToLocation(20.5937, 78.9629, 5)}
-          className="w-10 h-10 rounded-2xl glass-panel text-[#FF5E97] flex items-center justify-center hover:bg-[#FF5E97]/20 transition-all border border-mon-border shadow-xl"
+          className="w-10 h-10 rounded-card bg-paper-white text-carbon-black flex items-center justify-center transition-opacity hover:opacity-75"
           title="Center India Map"
         >
           <Compass className="w-4 h-4" />
@@ -283,10 +283,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       </div>
 
       {/* Realtime Status Toast */}
-      <div className="absolute bottom-6 left-6 z-30 hidden sm:flex items-center space-x-2 px-3.5 py-2 rounded-2xl glass-panel border border-mon-border text-xs text-gray-300 shadow-xl pointer-events-none">
-        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-        <Sparkles className="w-4 h-4 text-[#836EF9]" />
-        <span>Live India Map • Monad Testnet On-Chain</span>
+      <div className="absolute bottom-6 left-6 z-30 hidden sm:flex items-center space-x-2 px-4 py-2 rounded-pill bg-paper-white text-sm text-smoke font-mono pointer-events-none">
+        <span className="w-2 h-2 rounded-full bg-carbon-black animate-pulse" />
+        <span className="uppercase text-xs tracking-wide">Live · Monad Testnet</span>
       </div>
     </div>
   );

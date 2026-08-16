@@ -12,7 +12,6 @@ import {
   Eye,
   Send,
   X,
-  Sparkles,
 } from 'lucide-react';
 
 interface DrawingCanvasProps {
@@ -24,15 +23,15 @@ interface DrawingCanvasProps {
 }
 
 const PRESET_COLORS = [
-  '#FF5E97', // Monad Pink
-  '#836EF9', // Monad Purple
-  '#00F2FE', // Neon Cyan
-  '#4FACFE', // Electric Blue
-  '#00FF87', // Neon Green
-  '#FFD700', // Gold Yellow
-  '#FF5722', // Neon Orange
-  '#FFFFFF', // White
-  '#161622', // Canvas Dark
+  '#000000', // Carbon Black
+  '#2f2f2f', // Graphite
+  '#444444', // Slate
+  '#979797', // Smoke
+  '#c6c6c6', // Ash
+  '#d1ffca', // Mint Chip
+  '#fff100', // Voltage Yellow
+  '#ffffff', // Paper White
+  '#FF5722', // Warm accent
 ];
 
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -44,7 +43,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [tool, setTool] = useState<DrawingTool>('brush');
-  const [color, setColor] = useState<string>('#FF5E97');
+  const [color, setColor] = useState<string>('#000000');
   const [brushSize, setBrushSize] = useState<number>(8);
   const [title, setTitle] = useState<string>(initialTitle);
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
@@ -67,12 +66,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     canvas.width = 450;
     canvas.height = 450;
 
-    // Fill dark background
-    ctx.fillStyle = '#12121c';
+    // Fill white background
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Grid guide lines (subtle)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    // Grid guide lines (subtle warm canvas tone)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)';
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 30) {
       ctx.beginPath();
@@ -129,7 +128,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.fillStyle = '#12121c';
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     saveHistoryState();
   };
@@ -160,7 +159,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.lineWidth = brushSize;
-    ctx.strokeStyle = tool === 'eraser' ? '#12121c' : color;
+    ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : color;
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -196,12 +195,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
-    // Subtle text shadow/glow
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 10;
     ctx.fillText(textInput, textPos.x, textPos.y);
-    ctx.shadowBlur = 0; // reset
 
     setTextInput('');
     setIsAddingText(false);
@@ -232,19 +226,19 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-2xl glass-modal rounded-3xl p-5 md:p-6 border border-mon-border shadow-2xl my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-carbon-black/40 overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-paper-white rounded-card-lg p-6 md:p-8 my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-mon-border mb-4">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-tr from-[#836EF9] to-[#FF5E97] text-white">
+        <div className="flex items-center justify-between pb-4 border-b border-ash mb-5">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-btn bg-carbon-black text-paper-white">
               <Paintbrush className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-extrabold text-white flex items-center gap-1.5">
-                Create MON Graffiti <Sparkles className="w-4 h-4 text-[#FF5E97]" />
+              <h2 className="font-display text-xl text-carbon-black uppercase tracking-tight">
+                Create Graffiti
               </h2>
-              <p className="text-[11px] text-gray-400">
+              <p className="text-xs text-smoke font-mono">
                 {locationCoordinates
                   ? `Location: ${locationCoordinates.lat.toFixed(4)}, ${locationCoordinates.lng.toFixed(4)}`
                   : 'Draw your artwork below'}
@@ -253,16 +247,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-[#161622] hover:bg-[#222234] text-gray-400 hover:text-white transition-colors"
+            className="p-2 rounded-btn bg-mist-gray hover:bg-ash text-smoke hover:text-carbon-black transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Title Input */}
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-            Graffiti Artwork Title <span className="text-[#FF5E97]">*</span>
+        <div className="mb-5">
+          <label className="block text-xs font-mono text-smoke mb-1.5 uppercase tracking-wide">
+            Artwork Title <span className="text-carbon-black">*</span>
           </label>
           <input
             type="text"
@@ -270,66 +264,66 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             placeholder="e.g. MON Frog, Street Rocket, Neon Alien..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 bg-[#161622] border border-mon-border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#836EF9] transition-colors"
+            className="w-full px-4 py-3 bg-mist-gray rounded-btn text-sm text-carbon-black placeholder-ash font-sans focus:outline-none focus:ring-2 focus:ring-carbon-black/10 transition-all"
           />
         </div>
 
         {/* Toolbar Controls */}
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-[#161622] border border-mon-border">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 p-3 rounded-card bg-mist-gray">
           {/* Tool Selection */}
           <div className="flex items-center space-x-1">
             <button
               onClick={() => setTool('brush')}
-              className={`p-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all ${
+              className={`p-2 rounded-btn text-xs font-sans font-medium flex items-center space-x-1.5 transition-all ${
                 tool === 'brush'
-                  ? 'bg-gradient-to-r from-[#836EF9] to-[#FF5E97] text-white shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-[#202030]'
+                  ? 'bg-carbon-black text-paper-white'
+                  : 'text-smoke hover:text-carbon-black hover:bg-ash'
               }`}
               title="Brush Tool"
             >
               <Paintbrush className="w-4 h-4" />
-              <span className="hidden sm:inline">Brush</span>
+              <span className="hidden sm:inline uppercase tracking-tight">Brush</span>
             </button>
 
             <button
               onClick={() => setTool('eraser')}
-              className={`p-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all ${
+              className={`p-2 rounded-btn text-xs font-sans font-medium flex items-center space-x-1.5 transition-all ${
                 tool === 'eraser'
-                  ? 'bg-gradient-to-r from-[#836EF9] to-[#FF5E97] text-white shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-[#202030]'
+                  ? 'bg-carbon-black text-paper-white'
+                  : 'text-smoke hover:text-carbon-black hover:bg-ash'
               }`}
               title="Eraser Tool"
             >
               <Eraser className="w-4 h-4" />
-              <span className="hidden sm:inline">Eraser</span>
+              <span className="hidden sm:inline uppercase tracking-tight">Eraser</span>
             </button>
 
             <button
               onClick={() => setTool('text')}
-              className={`p-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all ${
+              className={`p-2 rounded-btn text-xs font-sans font-medium flex items-center space-x-1.5 transition-all ${
                 tool === 'text'
-                  ? 'bg-gradient-to-r from-[#836EF9] to-[#FF5E97] text-white shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-[#202030]'
+                  ? 'bg-carbon-black text-paper-white'
+                  : 'text-smoke hover:text-carbon-black hover:bg-ash'
               }`}
               title="Click on canvas to add text"
             >
               <Type className="w-4 h-4" />
-              <span className="hidden sm:inline">Text</span>
+              <span className="hidden sm:inline uppercase tracking-tight">Text</span>
             </button>
           </div>
 
           {/* Brush Size Slider */}
-          <div className="flex items-center space-x-2 px-2 py-1 bg-[#0E0E14] rounded-xl border border-mon-border">
-            <span className="text-[10px] text-gray-400 font-semibold uppercase">Size:</span>
+          <div className="flex items-center space-x-2 px-3 py-1.5 bg-paper-white rounded-btn">
+            <span className="text-[10px] text-smoke font-mono uppercase tracking-wide">Size:</span>
             <input
               type="range"
               min="2"
               max="40"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-20 accent-[#FF5E97] cursor-pointer"
+              className="w-20 accent-carbon-black cursor-pointer"
             />
-            <span className="text-xs font-bold text-gray-200 w-4 text-center">{brushSize}</span>
+            <span className="text-xs font-bold text-carbon-black w-4 text-center font-mono">{brushSize}</span>
           </div>
 
           {/* Action Tools */}
@@ -337,14 +331,14 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             <button
               onClick={handleUndo}
               disabled={history.length <= 1}
-              className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#202030] disabled:opacity-40 transition-colors"
+              className="p-2 rounded-btn text-smoke hover:text-carbon-black hover:bg-ash disabled:opacity-40 transition-colors"
               title="Undo"
             >
               <Undo className="w-4 h-4" />
             </button>
             <button
               onClick={clearCanvas}
-              className="p-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+              className="p-2 rounded-btn text-smoke hover:text-carbon-black hover:bg-ash transition-colors"
               title="Clear Canvas"
             >
               <Trash2 className="w-4 h-4" />
@@ -354,7 +348,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
         {/* Color Palette */}
         <div className="mb-4 flex items-center space-x-2 overflow-x-auto pb-1">
-          <Palette className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <Palette className="w-4 h-4 text-smoke flex-shrink-0" />
           <div className="flex items-center space-x-1.5">
             {PRESET_COLORS.map((c) => (
               <button
@@ -365,8 +359,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 }}
                 className={`w-6 h-6 rounded-full border-2 transition-transform ${
                   color === c && tool !== 'eraser'
-                    ? 'scale-125 border-white ring-2 ring-[#836EF9]'
-                    : 'border-transparent hover:scale-110'
+                    ? 'scale-125 border-carbon-black'
+                    : 'border-ash hover:scale-110'
                 }`}
                 style={{ backgroundColor: c }}
               />
@@ -386,7 +380,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         </div>
 
         {/* Canvas Area */}
-        <div className="relative flex justify-center items-center bg-[#09090E] rounded-2xl p-2 border border-mon-border shadow-inner">
+        <div className="relative flex justify-center items-center bg-mist-gray rounded-card p-2">
           <canvas
             ref={canvasRef}
             onMouseDown={startDrawing}
@@ -396,16 +390,16 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             onTouchStart={startDrawing}
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
-            className="w-full max-w-[450px] aspect-square rounded-xl cursor-crosshair touch-none shadow-lg"
+            className="w-full max-w-[450px] aspect-square rounded-xl cursor-crosshair touch-none"
           />
 
           {/* Text Input Prompt */}
           {isAddingText && (
             <div
-              className="absolute glass-modal p-3 rounded-xl z-20 border border-[#836EF9] shadow-2xl flex flex-col space-y-2"
+              className="absolute bg-paper-white p-3 rounded-card z-20 flex flex-col space-y-2"
               style={{ left: Math.min(textPos.x, 250), top: Math.min(textPos.y, 300) }}
             >
-              <span className="text-[10px] font-bold text-[#FF5E97]">Enter Text:</span>
+              <span className="text-[10px] font-mono text-smoke uppercase tracking-wide">Enter Text:</span>
               <input
                 type="text"
                 autoFocus
@@ -413,18 +407,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 onChange={(e) => setTextInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTextToCanvas()}
                 placeholder="Type text..."
-                className="px-2 py-1 bg-[#161622] text-xs text-white border border-mon-border rounded-lg outline-none"
+                className="px-2 py-1.5 bg-mist-gray text-xs text-carbon-black rounded-btn outline-none font-sans"
               />
               <div className="flex space-x-1 justify-end">
                 <button
                   onClick={() => setIsAddingText(false)}
-                  className="px-2 py-0.5 text-[10px] text-gray-400 hover:text-white"
+                  className="px-2 py-0.5 text-[10px] text-smoke hover:text-carbon-black"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={addTextToCanvas}
-                  className="px-2.5 py-0.5 text-[10px] bg-[#836EF9] text-white rounded-md font-bold"
+                  className="px-3 py-0.5 text-[10px] bg-carbon-black text-paper-white rounded-btn font-bold uppercase"
                 >
                   Apply
                 </button>
@@ -434,40 +428,39 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         </div>
 
         {/* Bottom Actions: Preview Modal & Publish */}
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3">
           <button
             onClick={() => {
               updatePreviewUrl();
               setShowPreview(!showPreview);
             }}
-            className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#161622] hover:bg-[#202030] border border-mon-border text-xs font-semibold text-gray-200 transition-colors"
+            className="flex items-center space-x-1.5 px-5 py-3 rounded-btn bg-mist-gray hover:bg-ash text-xs font-sans font-medium text-carbon-black transition-colors uppercase tracking-tight"
           >
-            <Eye className="w-4 h-4 text-[#836EF9]" />
+            <Eye className="w-4 h-4 text-smoke" />
             <span>{showPreview ? 'Hide Preview' : 'Preview'}</span>
           </button>
 
           <button
             onClick={handlePublishSubmit}
             disabled={isPublishing}
-            className="flex-1 flex items-center justify-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#FF5E97] text-white font-bold text-sm shadow-lg shadow-purple-500/25 hover:brightness-110 active:scale-[0.99] transition-all disabled:opacity-50"
+            className="flex-1 flex items-center justify-center space-x-2 px-6 py-3 rounded-btn bg-carbon-black text-paper-white font-sans font-medium text-sm uppercase tracking-tight transition-opacity hover:opacity-85 active:scale-[0.99] disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
             <span>{isPublishing ? 'Publishing to Map...' : 'Publish Graffiti'}</span>
           </button>
         </div>
 
-        {/* Live Preview Modal Overlay */}
+        {/* Live Preview */}
         {showPreview && (
-          <div className="mt-3 p-4 glass-panel rounded-2xl border border-[#FF5E97]/30 flex flex-col items-center">
-            <span className="text-xs font-bold text-[#FF5E97] mb-2">Map Marker Preview</span>
+          <div className="mt-4 p-4 rounded-card bg-mist-gray flex flex-col items-center">
+            <span className="text-xs font-mono text-smoke mb-2 uppercase tracking-wide">Map Marker Preview</span>
             {previewUrl && (
-              <div className="relative p-1.5 bg-gradient-to-tr from-[#836EF9] to-[#FF5E97] rounded-xl shadow-xl">
+              <div className="relative p-1 bg-paper-white rounded-card">
                 <img
                   src={previewUrl}
                   alt="Graffiti Preview"
-                  className="w-32 h-32 object-cover rounded-lg border border-[#0E0E14]"
+                  className="w-32 h-32 object-cover rounded-xl"
                 />
-                <span className="absolute -top-2 -right-2 text-xl">🎨</span>
               </div>
             )}
           </div>

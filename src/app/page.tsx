@@ -156,12 +156,12 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-[#09090E]">
+    <main className="relative w-screen h-screen overflow-hidden bg-warm-canvas">
       {/* Top Header */}
       <Header />
 
       {/* Main Interactive Map View centered over India */}
-      <div className="w-full h-full pt-16">
+      <div className="w-full h-full pt-32">
         <MapContainer
           graffitis={graffitis}
           onSelectGraffiti={(g) => setSelectedGraffiti(g)}
@@ -171,14 +171,13 @@ export default function Home() {
       </div>
 
       {/* Floating Action Button: Quick Create */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-30">
         <button
           onClick={handleQuickCreate}
-          className="px-6 py-3.5 rounded-full bg-gradient-to-r from-[#836EF9] via-[#FF5E97] to-[#836EF9] bg-[length:200%_auto] hover:bg-right text-white font-extrabold text-sm shadow-2xl flex items-center space-x-2.5 transition-all duration-300 transform hover:scale-105 glow-purple border border-white/20"
+          className="px-8 py-4 rounded-btn bg-carbon-black text-paper-white font-sans font-medium text-sm flex items-center space-x-3 transition-opacity duration-150 hover:opacity-85 uppercase tracking-tight"
         >
-          <span className="text-lg">🎨</span>
-          <span>Create Graffiti</span>
           <Plus className="w-4 h-4" />
+          <span>Create Graffiti</span>
         </button>
       </div>
 

@@ -3,67 +3,136 @@
 @tailwind utilities;
 
 :root {
-  --background: #09090e;
-  --foreground: #f3f4f6;
+  /* Colors */
+  --color-carbon-black: #000000;
+  --color-paper-white: #ffffff;
+  --color-warm-canvas: #e5e5e5;
+  --color-mist-gray: #f3f3f3;
+  --color-ash: #c6c6c6;
+  --color-smoke: #979797;
+  --color-slate: #444444;
+  --color-graphite: #2f2f2f;
+  --color-mint-chip: #d1ffca;
+  --color-voltage-yellow: #fff100;
+
+  /* Spacing */
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-40: 40px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 80px;
+  --card-padding: 24px;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--color-carbon-black);
+  background: var(--color-warm-canvas);
   font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
   height: 100vh;
   width: 100vw;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism utility classes */
-.glass-panel {
-  background: rgba(18, 18, 28, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* ── Flat surface utilities ── */
+
+.surface-card {
+  background: var(--color-paper-white);
+  border-radius: 24px;
 }
 
-.glass-modal {
-  background: rgba(14, 14, 22, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(131, 110, 249, 0.25);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(131, 110, 249, 0.15);
+.surface-inverted {
+  background: var(--color-carbon-black);
+  color: var(--color-paper-white);
+  border-radius: 32px;
 }
 
-.glow-purple {
-  box-shadow: 0 0 20px rgba(131, 110, 249, 0.4);
+.surface-mist {
+  background: var(--color-mist-gray);
+  border-radius: 24px;
 }
 
-.glow-pink {
-  box-shadow: 0 0 20px rgba(255, 94, 151, 0.4);
+/* ── Button utilities ── */
+
+.btn-filled {
+  background: var(--color-carbon-black);
+  color: var(--color-paper-white);
+  border: none;
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #836ef9 0%, #ff5e97 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.btn-filled:hover {
+  opacity: 0.85;
 }
 
-/* Custom map marker pulse */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-slate);
+  border: 1.5px solid var(--color-slate);
+  border-radius: 4px;
+  padding: 16px 24px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-carbon-black);
+  color: var(--color-carbon-black);
+}
+
+/* ── Tag pill ── */
+
+.tag-mint {
+  background: var(--color-mint-chip);
+  color: var(--color-carbon-black);
+  border-radius: 64px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  font-family: var(--font-jetbrains), monospace;
+}
+
+/* ── Nav pill ── */
+
+.nav-pill {
+  background: var(--color-paper-white);
+  border-radius: 48px;
+  padding: 8px 24px;
+}
+
+/* ── Marker pulse (monochrome) ── */
+
 @keyframes markerPulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 94, 151, 0.7);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.15);
   }
-
   70% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(255, 94, 151, 0);
+    box-shadow: 0 0 0 8px rgba(0, 0, 0, 0);
   }
-
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 94, 151, 0);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
 }
 
@@ -71,21 +140,33 @@ body {
   animation: markerPulse 3s infinite ease-in-out;
 }
 
-/* Custom Scrollbars */
+/* ── Scrollbars ── */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(14, 14, 22, 0.5);
+  background: var(--color-warm-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(131, 110, 249, 0.3);
+  background: var(--color-ash);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(131, 110, 249, 0.6);
+  background: var(--color-smoke);
+}
+
+/* ── Fade in animation ── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
 }

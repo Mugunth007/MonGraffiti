@@ -1,11 +1,24 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Anton, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+const anton = Anton({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-anton',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
   display: 'swap',
 });
 
@@ -21,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} dark`}>
+    <html lang="en" className={`${inter.variable} ${anton.variable} ${jetbrainsMono.variable}`}>
       <head>
         <link
           rel="stylesheet"
@@ -30,7 +43,7 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className={`${inter.className} font-sans bg-[#09090e] text-gray-100 antialiased overflow-hidden min-h-screen w-screen m-0 p-0`}>
+      <body className="font-sans bg-warm-canvas text-carbon-black antialiased overflow-hidden min-h-screen w-screen m-0 p-0">
         <AuthProvider>
           {children}
         </AuthProvider>
