@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+script = "script"
+test = "test"
+libs = ["lib"]
+
+# Monad Testnet Configuration
+chain_id = 10143
+eth_rpc_url = "https://testnet-rpc.monad.xyz"
+solc_version = "0.8.24"
+evm_version = "cancun"
+
+[rpc_endpoints]
+monad_testnet = "https://testnet-rpc.monad.xyz"
+
+[etherscan]
+monad_testnet = { key = "1234", url = "https://testnet.monadvision.com/api" }
