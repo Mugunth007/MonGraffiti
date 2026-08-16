@@ -40,30 +40,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [clickedLocation, setClickedLocation] = useState<LocationCoordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Initialize Watermark-Free Leaflet Dark Map Tile Engine
+  // Initialize Watermark-Free Leaflet Map Tile Engine
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // Check if Google Maps API key is provided
-    if (apiKey && apiKey !== 'your-google-maps-api-key-here') {
-      if ((window as any).google?.maps) {
-        initGoogleMap();
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.onload = () => initGoogleMap();
-      script.onerror = () => initLeafletMap();
-      document.head.appendChild(script);
-      return;
-    }
-
-    // Default to Leaflet light map tiles
     initLeafletMap();
   }, []);
 
-  // Leaflet Map Initialization with Light Tile Layer
   const initLeafletMap = async () => {
     if (!mapRef.current || leafletMapInstance.current) return;
 
@@ -79,8 +61,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
       // CartoDB Positron (light) tiles for the brutalist-editorial canvas feel
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         subdomains: 'abcd',
+        maxZoom: 19,
       }).addTo(map);
 
       // Handle map click to drop graffiti location pin
@@ -95,34 +77,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   };
 
-  // Google Maps Initialization — light neutral palette
-  const initGoogleMap = () => {
-    if (!mapRef.current || !(window as any).google?.maps) return;
-    setUseGoogleMaps(true);
-
-    const gMap = new (window as any).google.maps.Map(mapRef.current, {
-      center: center,
-      zoom: zoom,
-      disableDefaultUI: true,
-      zoomControl: true,
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#e5e5e5' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#444444' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c6c6c6' }] },
-        { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#f3f3f3' }] },
-      ],
-    });
-
-    gMap.addListener('click', (e: any) => {
-      setClickedLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    });
-
-    googleMapInstance.current = gMap;
-  };
-
-  // Render Leaflet Markers
+  // Render Markers
   const renderLeafletMarkers = (L: any, map: any) => {
     if (!map || !L) return;
 
@@ -135,8 +90,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         html: `<div style="padding:3px;border-radius:16px;background:#ffffff;cursor:pointer;transition:transform 0.15s;">
                  <img src="${g.image_url}" style="width:40px;height:40px;border-radius:12px;object-fit:cover;display:block;" />
                </div>`,
-        iconSize: [46, 46],
-        iconAnchor: [23, 23],
         iconSize: [46, 46],
         iconAnchor: [23, 23],
       });

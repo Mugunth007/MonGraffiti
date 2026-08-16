@@ -36,7 +36,7 @@
 body {
   color: var(--color-carbon-black);
   background: var(--color-warm-canvas);
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
   height: 100vh;
   width: 100vw;
@@ -117,6 +117,29 @@ body {
   background: var(--color-paper-white);
   border-radius: 48px;
   padding: 8px 24px;
+}
+
+/* ── Map overrides (from upstream) ── */
+
+/* Hide Google Maps dev watermark & overlays */
+.gm-style-cc,
+.gmnoprint,
+.gm-svpc,
+.gm-style iframe,
+div[style*="z-index: 1000001"],
+div[style*="For development purposes only"] {
+  display: none !important;
+}
+
+/* Leaflet container — light canvas */
+.leaflet-container {
+  background-color: #e5e5e5 !important;
+  font-family: inherit;
+}
+
+.custom-leaflet-marker {
+  background: transparent;
+  border: none;
 }
 
 /* ── Marker pulse (monochrome) ── */
