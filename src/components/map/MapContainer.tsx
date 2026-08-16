@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Graffiti, LocationCoordinates } from '@/lib/types';
 import { CustomGraffitiMarker } from './CustomGraffitiMarker';
-import { Search, MapPin, Plus, Sparkles, Navigation, Layers, Compass } from 'lucide-react';
+import { Search, MapPin, Plus, Sparkles, Navigation, Compass } from 'lucide-react';
 
 interface MapContainerProps {
   graffitis: Graffiti[];
@@ -30,10 +30,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   selectedGraffiti,
   onCreateGraffitiAt,
 }) => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapInstance = useRef<any>(null);
-  const googleMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
 
   // Default Map center over India (lat: 20.5937, lng: 78.9629) with zoom 5
@@ -41,32 +39,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [zoom, setZoom] = useState<number>(5);
   const [clickedLocation, setClickedLocation] = useState<LocationCoordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
 
-  // Initialize Leaflet Map or Google Maps
+  // Initialize Watermark-Free Leaflet Dark Map Tile Engine
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // Check if Google Maps API key is provided
-    if (apiKey && apiKey !== 'your-google-maps-api-key-here') {
-      if ((window as any).google?.maps) {
-        initGoogleMap();
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.onload = () => initGoogleMap();
-      script.onerror = () => initLeafletMap();
-      document.head.appendChild(script);
-      return;
-    }
-
-    // Default to Leaflet dark map tiles
     initLeafletMap();
-  }, [apiKey]);
+  }, []);
 
-  // Leaflet Map Initialization with Dark Tile Layer
   const initLeafletMap = async () => {
     if (!mapRef.current || leafletMapInstance.current) return;
 
@@ -77,16 +56,16 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         center: [center.lat, center.lng],
         zoom: zoom,
         zoomControl: false,
+        attributionControl: false,
       });
 
-      // Add CartoDB Dark Matter tile layer for stunning dark aesthetics
+      // CartoDB Dark Matter tile layer for high-resolution watermark-free dark map
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
         maxZoom: 19,
+        subdomains: 'abcd',
       }).addTo(map);
 
-      // Handle map click
+      // Handle map click to drop graffiti location pin
       map.on('click', (e: any) => {
         setClickedLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
@@ -98,33 +77,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   };
 
-  // Google Maps Initialization
-  const initGoogleMap = () => {
-    if (!mapRef.current || !(window as any).google?.maps) return;
-    setUseGoogleMaps(true);
-
-    const gMap = new (window as any).google.maps.Map(mapRef.current, {
-      center: center,
-      zoom: zoom,
-      disableDefaultUI: true,
-      zoomControl: true,
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#0e0e14' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#0e0e14' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#836ef9' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a3c' }] },
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#05050a' }] },
-      ],
-    });
-
-    gMap.addListener('click', (e: any) => {
-      setClickedLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    });
-
-    googleMapInstance.current = gMap;
-  };
-
-  // Render Leaflet Markers
+  // Render Markers
   const renderLeafletMarkers = (L: any, map: any) => {
     if (!map || !L) return;
 
@@ -134,12 +87,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     graffitis.forEach((g) => {
       const customIcon = L.divIcon({
         className: 'custom-leaflet-marker',
-        html: `<div class="relative p-1 rounded-2xl bg-gradient-to-tr from-[#836EF9] to-[#FF5E97] shadow-xl hover:scale-125 transition-transform cursor-pointer">
-                 <img src="${g.image_url}" class="w-10 h-10 rounded-xl object-cover border border-[#0E0E14]" />
-                 <span class="absolute -top-1 -right-1 text-xs">🎨</span>
+        html: `<div class="relative p-1 rounded-2xl bg-gradient-to-tr from-[#836EF9] to-[#FF5E97] shadow-2xl hover:scale-125 transition-all cursor-pointer">
+                 <img src="${g.image_url}" class="w-11 h-11 rounded-xl object-cover border border-[#0E0E14]" />
+                 <span class="absolute -top-1.5 -right-1.5 text-xs">🎨</span>
                </div>`,
-        iconSize: [44, 44],
-        iconAnchor: [22, 22],
+        iconSize: [46, 46],
+        iconAnchor: [23, 23],
       });
 
       const marker = L.marker([g.latitude, g.longitude], { icon: customIcon }).addTo(map);
@@ -182,15 +135,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     if (leafletMapInstance.current) {
       leafletMapInstance.current.setView([lat, lng], targetZoom);
-    } else if (googleMapInstance.current) {
-      googleMapInstance.current.panTo({ lat, lng });
-      googleMapInstance.current.setZoom(targetZoom);
     }
   };
 
   return (
     <div className="relative w-full h-full min-h-screen bg-[#05050A] overflow-hidden select-none">
-      {/* Search Navbar - Properly Aligned Below Top Header */}
+      {/* Search Navbar Aligned Below Top Header */}
       <div className="absolute top-20 left-4 right-4 md:left-6 md:w-[450px] z-30 flex flex-col gap-2.5">
         <form onSubmit={handleSearchSubmit} className="relative shadow-2xl">
           <input
@@ -223,7 +173,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         </div>
       </div>
 
-      {/* Map Renderer Container (Leaflet / Google Maps) */}
+      {/* Map Renderer Container (Watermark-Free Map Tiles) */}
       <div ref={mapRef} className="w-full h-full min-h-screen z-10" />
 
       {/* Render Clicked Location Pin with "Create Graffiti Here" */}
@@ -255,7 +205,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         </div>
       )}
 
-      {/* Map Control Buttons */}
+      {/* Map Controls */}
       <div className="absolute bottom-6 right-6 z-30 flex flex-col space-y-2">
         <button
           onClick={() => {
@@ -286,7 +236,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       <div className="absolute bottom-6 left-6 z-30 hidden sm:flex items-center space-x-2 px-3.5 py-2 rounded-2xl glass-panel border border-mon-border text-xs text-gray-300 shadow-xl pointer-events-none">
         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
         <Sparkles className="w-4 h-4 text-[#836EF9]" />
-        <span>Live India Map • Monad Testnet On-Chain</span>
+        <span>Live India Map • Watermark Free • Monad Testnet</span>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
   height: 100vh;
   width: 100vw;
@@ -49,18 +49,41 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* Hide Google Maps "For development purposes only" watermark & overlays */
+.gm-style-cc,
+.gmnoprint,
+.gm-svpc,
+.gm-style iframe,
+div[style*="z-index: 1000001"],
+div[style*="For development purposes only"] {
+  display: none !important;
+}
+
+.gm-style img {
+  filter: contrast(1.1) brightness(0.9);
+}
+
+/* Leaflet Dark Map Tile Customization */
+.leaflet-container {
+  background-color: #07070d !important;
+  font-family: inherit;
+}
+
+.custom-leaflet-marker {
+  background: transparent;
+  border: none;
+}
+
 /* Custom map marker pulse */
 @keyframes markerPulse {
   0% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(255, 94, 151, 0.7);
   }
-
   70% {
     transform: scale(1.05);
     box-shadow: 0 0 0 10px rgba(255, 94, 151, 0);
   }
-
   100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(255, 94, 151, 0);
