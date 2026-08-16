@@ -1,4 +1,4 @@
--- SQL Schema for MON GRAFFITI MVP
+-- SQL Schema & Permissions Fix for MON GRAFFITI
 -- Copy and paste this directly into your Supabase SQL Editor: https://app.supabase.com/project/_/sql
 
 -- 1. DROP EXISTING TABLES (Clean Reset)
@@ -29,7 +29,13 @@ CREATE TABLE IF NOT EXISTS public.graffiti_likes (
   UNIQUE(graffiti_id, user_id)
 );
 
--- 4. ENABLE ROW LEVEL SECURITY (RLS) & PUBLIC POLICIES
+-- 4. GRANT PERMISSIONS TO ANON & AUTHENTICATED ROLES (Fixes 42501 permission denied)
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated;
+
+-- 5. ENABLE ROW LEVEL SECURITY (RLS) & PUBLIC POLICIES
 ALTER TABLE public.graffitis ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.graffiti_likes ENABLE ROW LEVEL SECURITY;
 
@@ -53,5 +59,5 @@ CREATE POLICY "Allow public insert on graffiti_likes"
   ON public.graffiti_likes FOR INSERT
   WITH CHECK (true);
 
--- 5. ENABLE SUPABASE REALTIME PUBLICATION
+-- 6. ENABLE SUPABASE REALTIME PUBLICATION
 ALTER PUBLICATION supabase_realtime ADD TABLE public.graffitis;

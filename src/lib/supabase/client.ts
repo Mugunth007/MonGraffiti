@@ -4,21 +4,47 @@ import { Graffiti } from '../types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Singleton Supabase instance or null fallback for offline testing
-export const supabase: SupabaseClient | null = (supabaseUrl && supabaseAnonKey)
+// Singleton Supabase instance or null fallback
+export const supabase: SupabaseClient | null = (supabaseUrl && supabaseUrl.startsWith('http') && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// Pure dynamic state without mock static data
-let memoryGraffitis: Graffiti[] = [];
+const STORAGE_KEY = 'mongraffiti_all_graffitis';
 
 /**
- * Fetch all published graffitis directly from Supabase
+ * Get local storage cached graffitis
+ */
+function getLocalGraffitis(): Graffiti[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save to local storage cache
+ */
+function saveLocalGraffitis(list: Graffiti[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Fetch all published graffitis directly from Supabase (or local persistent storage)
  */
 export async function fetchGraffitis(): Promise<Graffiti[]> {
+  const localList = getLocalGraffitis();
+
   if (!supabase) {
-    console.warn('Supabase credentials not set in .env.local.');
-    return memoryGraffitis;
+    console.warn('Supabase credentials not configured in environment variables. Using persistent local cache.');
+    return localList;
   }
 
   try {
@@ -28,24 +54,25 @@ export async function fetchGraffitis(): Promise<Graffiti[]> {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching graffitis from Supabase:', error.message);
-      return memoryGraffitis;
+      console.error('Error fetching graffitis from Supabase DB:', error.message);
+      return localList;
     }
 
     if (data) {
-      memoryGraffitis = data as Graffiti[];
-      return memoryGraffitis;
+      const dbGraffitis = data as Graffiti[];
+      saveLocalGraffitis(dbGraffitis);
+      return dbGraffitis;
     }
-    return [];
+    return localList;
   } catch (err) {
     console.error('Fetch graffitis failed:', err);
-    return memoryGraffitis;
+    return localList;
   }
 }
 
 /**
  * Upload image data URL to Supabase Storage bucket 'graffiti-art'
- * Returns the public CDN URL or data URL as fallback.
+ * Returns the public CDN URL or data URL.
  */
 export async function uploadArtworkImage(dataUrl: string, fileName: string): Promise<string> {
   if (!supabase) {
@@ -53,7 +80,6 @@ export async function uploadArtworkImage(dataUrl: string, fileName: string): Pro
   }
 
   try {
-    // Convert data URL to Blob
     const response = await fetch(dataUrl);
     const blob = await response.blob();
     
@@ -66,7 +92,7 @@ export async function uploadArtworkImage(dataUrl: string, fileName: string): Pro
       });
 
     if (error) {
-      console.warn('Storage upload notice (falling back to data URL):', error.message);
+      console.warn('Storage upload error (using data URL fallback):', error.message);
       return dataUrl;
     }
 
@@ -89,8 +115,10 @@ export async function publishGraffitiToSupabase(newGraffiti: Omit<Graffiti, 'id'
     created_at: new Date().toISOString(),
   };
 
-  // Keep local array synced
-  memoryGraffitis = [fullGraffiti, ...memoryGraffitis];
+  // Sync to local persistent cache
+  const localList = getLocalGraffitis();
+  const updatedLocal = [fullGraffiti, ...localList.filter((g) => g.id !== fullGraffiti.id)];
+  saveLocalGraffitis(updatedLocal);
 
   if (!supabase) {
     return fullGraffiti;
@@ -131,21 +159,24 @@ export async function publishGraffitiToSupabase(newGraffiti: Omit<Graffiti, 'id'
  * Increment graffiti like count
  */
 export async function incrementGraffitiLike(id: string): Promise<number> {
-  const target = memoryGraffitis.find((g) => g.id === id);
+  const localList = getLocalGraffitis();
+  const target = localList.find((g) => g.id === id);
+  const newLikes = (target?.likes_count || 0) + 1;
+
   if (target) {
-    target.likes_count += 1;
+    target.likes_count = newLikes;
+    saveLocalGraffitis(localList);
   }
 
   if (!supabase) {
-    return target ? target.likes_count : 1;
+    return newLikes;
   }
 
   try {
-    const currentLikes = target?.likes_count || 1;
-    await supabase.from('graffitis').update({ likes_count: currentLikes }).eq('id', id);
-    return currentLikes;
+    await supabase.from('graffitis').update({ likes_count: newLikes }).eq('id', id);
+    return newLikes;
   } catch {
-    return target?.likes_count || 1;
+    return newLikes;
   }
 }
 
@@ -163,8 +194,9 @@ export function subscribeToRealtimeGraffitis(onNewGraffiti: (graffiti: Graffiti)
       (payload) => {
         if (payload.new) {
           const newG = payload.new as Graffiti;
-          if (!memoryGraffitis.some((g) => g.id === newG.id)) {
-            memoryGraffitis = [newG, ...memoryGraffitis];
+          const localList = getLocalGraffitis();
+          if (!localList.some((g) => g.id === newG.id)) {
+            saveLocalGraffitis([newG, ...localList]);
           }
           onNewGraffiti(newG);
         }

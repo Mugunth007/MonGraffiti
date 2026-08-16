@@ -30,10 +30,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   selectedGraffiti,
   onCreateGraffitiAt,
 }) => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapInstance = useRef<any>(null);
-  const googleMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
 
   // Default Map center over India (lat: 20.5937, lng: 78.9629) with zoom 5
@@ -41,9 +39,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const [zoom, setZoom] = useState<number>(5);
   const [clickedLocation, setClickedLocation] = useState<LocationCoordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
 
-  // Initialize Leaflet Map or Google Maps
+  // Initialize Watermark-Free Leaflet Dark Map Tile Engine
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -64,7 +61,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     // Default to Leaflet light map tiles
     initLeafletMap();
-  }, [apiKey]);
+  }, []);
 
   // Leaflet Map Initialization with Light Tile Layer
   const initLeafletMap = async () => {
@@ -77,16 +74,16 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         center: [center.lat, center.lng],
         zoom: zoom,
         zoomControl: false,
+        attributionControl: false,
       });
 
       // CartoDB Positron (light) tiles for the brutalist-editorial canvas feel
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         subdomains: 'abcd',
-        maxZoom: 19,
       }).addTo(map);
 
-      // Handle map click
+      // Handle map click to drop graffiti location pin
       map.on('click', (e: any) => {
         setClickedLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
@@ -140,6 +137,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                </div>`,
         iconSize: [46, 46],
         iconAnchor: [23, 23],
+        iconSize: [46, 46],
+        iconAnchor: [23, 23],
       });
 
       const marker = L.marker([g.latitude, g.longitude], { icon: customIcon }).addTo(map);
@@ -182,9 +181,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
     if (leafletMapInstance.current) {
       leafletMapInstance.current.setView([lat, lng], targetZoom);
-    } else if (googleMapInstance.current) {
-      googleMapInstance.current.panTo({ lat, lng });
-      googleMapInstance.current.setZoom(targetZoom);
     }
   };
 
@@ -223,7 +219,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         </div>
       </div>
 
-      {/* Map Renderer Container (Leaflet / Google Maps) */}
+      {/* Map Renderer Container (Watermark-Free Map Tiles) */}
       <div ref={mapRef} className="w-full h-full min-h-screen z-10" />
 
       {/* Render Clicked Location Pin with "Create Graffiti Here" */}
@@ -255,7 +251,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         </div>
       )}
 
-      {/* Map Control Buttons */}
+      {/* Map Controls */}
       <div className="absolute bottom-6 right-6 z-30 flex flex-col space-y-2">
         <button
           onClick={() => {
